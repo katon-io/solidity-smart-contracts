@@ -1,0 +1,21 @@
+{
+  "name": "solidity-smart-contracts",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/katon-io/solidity-smart-contracts.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/katon-io/solidity-smart-contracts/issues"
+  },
+  "homepage": "https://github.com/katon-io/solidity-smart-contracts#readme",
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.8.0-rc.1"
+  }
+}
