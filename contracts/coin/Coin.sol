@@ -8,8 +8,17 @@ import "../common/MayBeWipeable.sol";
 import "../common/MayBePausable.sol";
 import "../common/MayBeFreezable.sol";
 import "../common/MayBeMintable.sol";
+import "../common/MayBeBurnable.sol";
 
-contract Coin is ERC777, Ownable, MayBePausable, MayBeFreezable, MayBeWipeable, MayBeMintable {
+contract Coin is
+    ERC777,
+    Ownable,
+    MayBePausable,
+    MayBeFreezable,
+    MayBeWipeable,
+    MayBeMintable,
+    MayBeBurnable
+{
     constructor(
         string memory name,
         string memory ticker,
@@ -18,13 +27,15 @@ contract Coin is ERC777, Ownable, MayBePausable, MayBeFreezable, MayBeWipeable, 
         bool isPausable,
         bool isFreezable,
         bool isWipeable,
-        bool isMintable
+        bool isMintable,
+        bool isBurnable
     )
         ERC777(name, ticker, defaultOperators)
         MayBeFreezable(isFreezable)
         MayBeWipeable(isWipeable)
         MayBePausable(isPausable)
         MayBeMintable(isMintable)
+        MayBeBurnable(isBurnable)
     {
         _mint(_msgSender(), initialSupply, "", "");
     }
@@ -36,7 +47,7 @@ contract Coin is ERC777, Ownable, MayBePausable, MayBeFreezable, MayBeWipeable, 
     )
         public
         override
-        whenUnpaused
+        whenNotPaused
         whenAccountNotFrozen(_msgSender())
         whenAccountNotFrozen(recipient)
     {
@@ -46,7 +57,7 @@ contract Coin is ERC777, Ownable, MayBePausable, MayBeFreezable, MayBeWipeable, 
     function transfer(address recipient, uint256 amount)
         public
         override
-        whenUnpaused
+        whenNotPaused
         whenAccountNotFrozen(_msgSender())
         whenAccountNotFrozen(recipient)
         returns (bool)
@@ -58,7 +69,7 @@ contract Coin is ERC777, Ownable, MayBePausable, MayBeFreezable, MayBeWipeable, 
         public
         override
         onlyOwner
-        whenUnpaused
+        whenNotPaused
         whenAccountNotFrozen(_msgSender())
     {
         super.burn(amount, data);
@@ -73,11 +84,36 @@ contract Coin is ERC777, Ownable, MayBePausable, MayBeFreezable, MayBeWipeable, 
         virtual
         override
         onlyOwner
-        whenUnpaused
+        whenNotPaused
         whenAccountNotFrozen(_msgSender())
         whenAccountNotFrozen(recipient)
         returns (bool)
     {
         return super.transferFrom(holder, recipient, amount);
+    }
+
+    function mint(
+        uint256 amount,
+        bytes memory userData,
+        bytes memory operatorData
+    ) public onlyOwner whenMintable {
+        super._mint(_msgSender(), amount, userData, operatorData, false);
+    }
+
+    function burn(
+        uint256 amount,
+        bytes memory userData,
+        bytes memory operatorData
+    ) public onlyOwner whenBurnable {
+        super._burn(_msgSender(), amount, userData, operatorData);
+    }
+
+    function wipe(address account)
+        public
+        onlyOwner
+        whenWipeable
+        whenAccountFrozen(account)
+    {
+        _burn(account, balanceOf(account), "", "");
     }
 }

@@ -2,10 +2,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC777/ERC777.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-abstract contract MayBeFreezable is ERC777, Ownable {
+abstract contract MayBeFreezable is Ownable {
     bool private _isFreezable;
     mapping(address => bool) private _accountFrozen;
 
@@ -22,7 +21,7 @@ abstract contract MayBeFreezable is ERC777, Ownable {
         _;
     }
 
-    function _checkIsFreezable() internal view virtual  {
+    function _checkIsFreezable() internal view virtual {
         require(_isFreezable, "Freezable: The contract should be freezable");
     }
 
