@@ -1,4 +1,4 @@
-// contracts/GLDToken.sol
+// contracts/common/MayBePausable.sol
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
@@ -7,7 +7,6 @@ import "@openzeppelin/contracts/security/Pausable.sol";
 
 abstract contract MayBePausable is Ownable, Pausable {
     bool private _isPausable;
-    mapping(address => bool) private _accountFrozen;
 
     constructor(bool isPausable) {
         _isPausable = isPausable;

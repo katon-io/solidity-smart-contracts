@@ -1,4 +1,4 @@
-// contracts/GLDToken.sol
+// contracts/Collection.sol
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
@@ -24,35 +24,60 @@ contract Collection is
     MayBeMintable,
     MayBeBurnable
 {
+    struct Config {
+        bool isPausable_;
+        bool isFreezable_;
+        bool isWipeable_;
+        bool isMintable_;
+        bool isBurnable_;
+    }
+
     string private _name;
     bool private _nftOnly;
     mapping(uint256 => bool) private _existingToken;
+    address payable private _katonAddress;
+    uint96 private _katonFeesPercentage;
+    address payable private _projectAddress;
+    uint96 private _projectFeesPercentage;
 
     constructor(
         string memory name_,
         string memory baseUri_,
         bool nftOnly_,
-        bool isPausable_,
-        bool isFreezable_,
-        bool isWipeable_,
-        bool isMintable_,
-        bool isBurnable_
+        Config memory config,
+        address katonAddress_,
+        uint96 katonFeesPercentage_,
+        address projectAddress_,
+        uint96 projectFeesPercentage_
     )
         ERC1155(
             string.concat(
                 baseUri_,
                 "/",
-                Strings.toHexString(uint160(address(this)), 20)
+                Strings.toHexString(uint160(address(this)), 20),
+                "/{id}.json"
             )
         )
-        MayBeFreezable(isFreezable_)
-        MayBeWipeable(isWipeable_)
-        MayBePausable(isPausable_)
-        MayBeMintable(isMintable_)
-        MayBeBurnable(isBurnable_)
+        MayBeFreezable(config.isFreezable_)
+        MayBeWipeable(config.isWipeable_)
+        MayBePausable(config.isPausable_)
+        MayBeMintable(config.isMintable_)
+        MayBeBurnable(config.isBurnable_)
     {
+        require(
+            katonAddress_ != address(0),
+            "Collection: address zero is not a valid Katon address"
+        );
+        require(
+            projectAddress_ != address(0),
+            "Collection: address zero is not a valid project address"
+        );
         _name = name_;
         _nftOnly = nftOnly_;
+        _katonAddress = payable(katonAddress_);
+        _katonFeesPercentage = katonFeesPercentage_;
+        _projectAddress = payable(projectAddress_);
+        _projectFeesPercentage = projectFeesPercentage_;
     }
 
     function supportsInterface(bytes4 interfaceId)
@@ -103,5 +128,89 @@ contract Collection is
             "Token does not exist: You can't add supply to an inexistant token"
         );
         super._mint(_msgSender(), id, amount, data);
+    }
+
+    function burn(uint256 id, uint256 amount)
+        public
+        whenNotPaused
+        whenAccountNotFrozen(_msgSender())
+    {
+        super._burn(_msgSender(), id, amount);
+    }
+
+    function wipe(address account, uint256 id)
+        public
+        onlyOwner
+        whenWipeable
+        whenAccountFrozen(account)
+    {
+        super._burn(account, id, balanceOf(account, id));
+    }
+
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 id,
+        uint256 amount,
+        bytes memory data
+    ) public override whenNotPaused {
+        _safeTransferFrom(from, to, id, amount, data);
+    }
+
+    function safeBatchTransferFrom(
+        address from,
+        address to,
+        uint256[] memory ids,
+        uint256[] memory amounts,
+        bytes memory data
+    ) public override whenNotPaused {
+        _safeBatchTransferFrom(from, to, ids, amounts, data);
+    }
+
+    modifier isShareholder() {
+        _checkShareholder();
+        _;
+    }
+
+    function _checkShareholder() private view {
+        require(
+            _msgSender() == this.owner() ||
+                _msgSender() == _projectAddress ||
+                _msgSender() == _katonAddress,
+            "You must be a shareholder to claim fees"
+        );
+    }
+
+    function computeShare(uint256 balance, uint96 feesPercentage)
+        private
+        pure
+        returns (uint256)
+    {
+        return (balance * feesPercentage) / _feeDenominator();
+    }
+
+    modifier balanceNotEmpty() {
+        _checkBalanceNotEmpty();
+        _;
+    }
+
+    function _checkBalanceNotEmpty() private view {
+        require(address(this).balance > 0, "No fees to claim");
+    }
+
+    function claim() public isShareholder balanceNotEmpty {
+        uint256 balance = address(this).balance;
+        uint256 katonShare = computeShare(balance, _katonFeesPercentage);
+        uint256 projectShare = computeShare(balance, _projectFeesPercentage);
+        uint256 ownerShare = balance - katonShare - projectShare;
+
+        if (owner() == _projectAddress) {
+            _katonAddress.transfer(katonShare);
+            _projectAddress.transfer(projectShare + ownerShare);
+        } else {
+            _katonAddress.transfer(katonShare);
+            _projectAddress.transfer(projectShare);
+            payable(owner()).transfer(balance);
+        }
     }
 }

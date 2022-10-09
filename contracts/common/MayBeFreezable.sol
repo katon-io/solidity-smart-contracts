@@ -1,4 +1,4 @@
-// contracts/GLDToken.sol
+// contracts/common/MayBeFreezable.sol
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
@@ -53,11 +53,11 @@ abstract contract MayBeFreezable is Ownable {
         );
     }
 
-    function addFrozenAccount(address account) public onlyOwner {
+    function addFrozenAccount(address account) public onlyOwner whenFreezable {
         _accountFrozen[account] = true;
     }
 
-    function removeFrozenAccount(address account) public onlyOwner {
+    function removeFrozenAccount(address account) public onlyOwner whenFreezable {
         _accountFrozen[account] = false;
     }
 }

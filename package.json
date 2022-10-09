@@ -16,6 +16,7 @@
   },
   "homepage": "https://github.com/katon-io/solidity-smart-contracts#readme",
   "dependencies": {
-    "@openzeppelin/contracts": "^4.8.0-rc.1"
+    "@openzeppelin/contracts": "^4.8.0-rc.1",
+    "solc": "^0.8.17"
   }
 }

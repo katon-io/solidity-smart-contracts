@@ -1,4 +1,4 @@
-// contracts/GLDToken.sol
+// contracts/common/MayBeMintable.sol
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
@@ -6,7 +6,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 abstract contract MayBeMintable is Ownable {
     bool private _isMintable;
-    mapping(address => bool) private _accountFrozen;
 
     constructor(bool isMintable) {
         _isMintable = isMintable;

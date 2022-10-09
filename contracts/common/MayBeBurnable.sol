@@ -1,4 +1,4 @@
-// contracts/GLDToken.sol
+// contracts/common/MayBeBurnable.sol
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
@@ -6,7 +6,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 abstract contract MayBeBurnable is Ownable {
     bool private _isBurnable;
-    mapping(address => bool) private _accountFrozen;
 
     constructor(bool isBurnable) {
         _isBurnable = isBurnable;
