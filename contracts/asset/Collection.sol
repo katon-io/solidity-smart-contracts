@@ -1,6 +1,6 @@
 // contracts/Collection.sol
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
@@ -8,13 +8,16 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
+import "@openzeppelin/contracts/metatx/ERC2771Context.sol";
 import "../common/MayBeWipeable.sol";
 import "../common/MayBePausable.sol";
 import "../common/MayBeFreezable.sol";
 import "../common/MayBeMintable.sol";
 import "../common/MayBeBurnable.sol";
+import "../common/Config.sol";
 
 contract Collection is
+    ERC2771Context,
     ERC1155,
     ERC2981,
     Ownable,
@@ -24,14 +27,6 @@ contract Collection is
     MayBeMintable,
     MayBeBurnable
 {
-    struct Config {
-        bool isPausable_;
-        bool isFreezable_;
-        bool isWipeable_;
-        bool isMintable_;
-        bool isBurnable_;
-    }
-
     string private _name;
     bool private _nftOnly;
     mapping(uint256 => bool) private _existingToken;
@@ -41,6 +36,7 @@ contract Collection is
     uint96 private _projectFeesPercentage;
 
     constructor(
+        address owner_,
         string memory name_,
         string memory baseUri_,
         bool nftOnly_,
@@ -48,8 +44,10 @@ contract Collection is
         address katonAddress_,
         uint96 katonFeesPercentage_,
         address projectAddress_,
-        uint96 projectFeesPercentage_
+        uint96 projectFeesPercentage_,
+        address trustedForwarder_
     )
+    ERC2771Context(trustedForwarder_)
         ERC1155(
             string.concat(
                 baseUri_,
@@ -78,6 +76,29 @@ contract Collection is
         _katonFeesPercentage = katonFeesPercentage_;
         _projectAddress = payable(projectAddress_);
         _projectFeesPercentage = projectFeesPercentage_;
+        if(_msgSender() != owner_) {
+            _transferOwnership(owner_);
+        } 
+    }
+    
+    function _msgData() internal view virtual override(ERC2771Context, Context) returns (bytes calldata) {
+        if (isTrustedForwarder(super._msgSender())) {
+            return super._msgData()[:msg.data.length - 20];
+        } else {
+            return super._msgData();
+        }
+    }
+
+    function _msgSender() internal view virtual override(ERC2771Context, Context) returns (address sender) {
+        if (isTrustedForwarder(super._msgSender())) {
+            // The assembly code is more direct than the Solidity version using `abi.decode`.
+            /// @solidity memory-safe-assembly
+            assembly {
+                sender := shr(96, calldataload(sub(calldatasize(), 20)))
+            }
+        } else {
+            return super._msgSender();
+        }
     }
 
     function supportsInterface(bytes4 interfaceId)
