@@ -26,8 +26,17 @@ abstract contract MayBeMintable is Ownable, MayBeUpgradeable {
     }
 
     function setMintable(bool isMintable) public onlyOwner whenUpgradeable {
-        require(_isMintable == isMintable && _isMintable, "Mintable: The contract is already mintable");
-        require(_isMintable == isMintable && !_isMintable, "Mintable: The contract is already not mintable");
+        if (isMintable) {
+            require(
+                _isMintable != isMintable,
+                "Mintable: The contract is already mintable"
+            );
+        } else {
+            require(
+                _isMintable != isMintable,
+                "Mintable: The contract is already not mintable"
+            );
+        }
         _isMintable = isMintable;
     }
 }

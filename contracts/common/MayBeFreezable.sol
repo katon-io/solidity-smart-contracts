@@ -58,13 +58,24 @@ abstract contract MayBeFreezable is Ownable, MayBeUpgradeable {
         _accountFrozen[account] = true;
     }
 
-    function removeFrozenAccount(address account) public onlyOwner whenFreezable {
+    function removeFrozenAccount(
+        address account
+    ) public onlyOwner whenFreezable {
         _accountFrozen[account] = false;
     }
 
     function setFreezable(bool isFreezable) public onlyOwner whenUpgradeable {
-        require(_isFreezable == isFreezable && _isFreezable, "Freezable: The contract is already freezable");
-        require(_isFreezable == isFreezable && !_isFreezable, "Freezable: The contract is already not freezable");
+        if (isFreezable) {
+            require(
+                _isFreezable != isFreezable,
+                "Freezable: The contract is already freezable"
+            );
+        } else {
+            require(
+                _isFreezable != isFreezable,
+                "Freezable: The contract is already not freezable"
+            );
+        }
         _isFreezable = isFreezable;
     }
 }

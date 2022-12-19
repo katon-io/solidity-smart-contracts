@@ -34,8 +34,17 @@ abstract contract MayBePausable is Ownable, MayBeUpgradeable, Pausable {
     }
 
     function setPausable(bool isPausable) public onlyOwner whenUpgradeable {
-        require(_isPausable == isPausable && _isPausable, "Pausable: The contract is already pausable");
-        require(_isPausable == isPausable && !_isPausable, "Pausable: The contract is already not pausable");
+        if (isPausable) {
+            require(
+                _isPausable != isPausable,
+                "Pausable: The contract is already pausable"
+            );
+        } else {
+            require(
+                _isPausable != isPausable,
+                "Pausable: The contract is already not pausable"
+            );
+        }
         _isPausable = isPausable;
     }
 }

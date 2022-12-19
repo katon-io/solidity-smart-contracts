@@ -10,7 +10,7 @@ abstract contract MayBeWipeable is Ownable, MayBeUpgradeable, MayBeFreezable {
     bool private _isWipeable;
 
     constructor(bool isWipeable) {
-        if(isWipeable) {
+        if (isWipeable) {
             _checkIsFreezable();
         }
         _isWipeable = isWipeable;
@@ -30,8 +30,17 @@ abstract contract MayBeWipeable is Ownable, MayBeUpgradeable, MayBeFreezable {
     }
 
     function setWipeable(bool isWipeable) public onlyOwner whenUpgradeable {
-        require(_isWipeable == isWipeable && _isWipeable, "Wipeable: The contract is already wipeable");
-        require(_isWipeable == isWipeable && !_isWipeable, "Wipeable: The contract is already not wipeable");
+        if (isWipeable) {
+            require(
+                _isWipeable != isWipeable,
+                "Wipeable: The contract is already wipeable"
+            );
+        } else {
+            require(
+                _isWipeable != isWipeable,
+                "Wipeable: The contract is already not wipeable"
+            );
+        }
         _isWipeable = isWipeable;
     }
 }

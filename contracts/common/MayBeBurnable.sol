@@ -26,8 +26,17 @@ abstract contract MayBeBurnable is Ownable, MayBeUpgradeable {
     }
 
     function setBurnable(bool isBurnable) public onlyOwner whenUpgradeable {
-        require(_isBurnable == isBurnable && _isBurnable, "Burnable: The contract is already burnable");
-        require(_isBurnable == isBurnable && !_isBurnable, "Burnable: The contract is already not burnable");
+        if (isBurnable) {
+            require(
+                _isBurnable != isBurnable,
+                "Burnable: The contract is already burnable"
+            );
+        } else {
+            require(
+                _isBurnable != isBurnable,
+                "Burnable: The contract is already not burnable"
+            );
+        }
         _isBurnable = isBurnable;
     }
 }
