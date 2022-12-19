@@ -3,8 +3,9 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "./MayBeUpgradeable.sol";
 
-abstract contract MayBeBurnable is Ownable {
+abstract contract MayBeBurnable is Ownable, MayBeUpgradeable {
     bool private _isBurnable;
 
     constructor(bool isBurnable) {
@@ -22,5 +23,11 @@ abstract contract MayBeBurnable is Ownable {
 
     function _checkIsBurnable() internal view virtual {
         require(burnable(), "Burnable: The contract is not burnable");
+    }
+
+    function setBurnable(bool isBurnable) public onlyOwner whenUpgradeable {
+        require(_isBurnable == isBurnable && _isBurnable, "Burnable: The contract is already burnable");
+        require(_isBurnable == isBurnable && !_isBurnable, "Burnable: The contract is already not burnable");
+        _isBurnable = isBurnable;
     }
 }

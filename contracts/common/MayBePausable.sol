@@ -4,8 +4,9 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
+import "./MayBeUpgradeable.sol";
 
-abstract contract MayBePausable is Ownable, Pausable {
+abstract contract MayBePausable is Ownable, MayBeUpgradeable, Pausable {
     bool private _isPausable;
 
     constructor(bool isPausable) {
@@ -30,5 +31,11 @@ abstract contract MayBePausable is Ownable, Pausable {
 
     function unpause() public onlyOwner whenPaused {
         _unpause();
+    }
+
+    function setPausable(bool isPausable) public onlyOwner whenUpgradeable {
+        require(_isPausable == isPausable && _isPausable, "Pausable: The contract is already pausable");
+        require(_isPausable == isPausable && !_isPausable, "Pausable: The contract is already not pausable");
+        _isPausable = isPausable;
     }
 }

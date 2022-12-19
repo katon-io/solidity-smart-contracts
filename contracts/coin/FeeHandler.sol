@@ -11,7 +11,7 @@ contract FeeHandler is ERC2771Context, Ownable {
         ERC2771Context(trustedForwarder_) {}
 
     function _msgData() internal view virtual override(ERC2771Context, Context) returns (bytes calldata) {
-        if (isTrustedForwarder(super._msgSender())) {
+        if (isTrustedForwarder(msg.sender)) {
             return super._msgData()[:msg.data.length - 20];
         } else {
             return super._msgData();
@@ -19,7 +19,7 @@ contract FeeHandler is ERC2771Context, Ownable {
     }
 
     function _msgSender() internal view virtual override(ERC2771Context, Context) returns (address sender) {
-        if (isTrustedForwarder(super._msgSender())) {
+        if (isTrustedForwarder(msg.sender)) {
             // The assembly code is more direct than the Solidity version using `abi.decode`.
             /// @solidity memory-safe-assembly
             assembly {

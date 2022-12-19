@@ -10,6 +10,7 @@ import "../common/MayBePausable.sol";
 import "../common/MayBeFreezable.sol";
 import "../common/MayBeMintable.sol";
 import "../common/MayBeBurnable.sol";
+import "../common/MayBeUpgradeable.sol";
 import "../common/Config.sol";
 
 contract Coin is
@@ -33,6 +34,7 @@ contract Coin is
     )
         ERC2771Context(trustedForwarder_)
         ERC777(name_, ticker_, defaultOperators_)
+        MayBeUpgradeable(config_.isUpgradeable)
         MayBeFreezable(config_.isFreezable_)
         MayBeWipeable(config_.isWipeable_)
         MayBePausable(config_.isPausable_)

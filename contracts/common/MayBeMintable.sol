@@ -3,8 +3,9 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "./MayBeUpgradeable.sol";
 
-abstract contract MayBeMintable is Ownable {
+abstract contract MayBeMintable is Ownable, MayBeUpgradeable {
     bool private _isMintable;
 
     constructor(bool isMintable) {
@@ -22,5 +23,11 @@ abstract contract MayBeMintable is Ownable {
 
     function _checkIsMintable() internal view virtual {
         require(mintable(), "Mintable: The contract is not mintable");
+    }
+
+    function setMintable(bool isMintable) public onlyOwner whenUpgradeable {
+        require(_isMintable == isMintable && _isMintable, "Mintable: The contract is already mintable");
+        require(_isMintable == isMintable && !_isMintable, "Mintable: The contract is already not mintable");
+        _isMintable = isMintable;
     }
 }

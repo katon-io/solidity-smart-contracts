@@ -3,8 +3,9 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "./MayBeUpgradeable.sol";
 
-abstract contract MayBeFreezable is Ownable {
+abstract contract MayBeFreezable is Ownable, MayBeUpgradeable {
     bool private _isFreezable;
     mapping(address => bool) private _accountFrozen;
 
@@ -22,7 +23,7 @@ abstract contract MayBeFreezable is Ownable {
     }
 
     function _checkIsFreezable() internal view virtual {
-        require(_isFreezable, "Freezable: The contract should be freezable");
+        require(freezable(), "Freezable: The contract should be freezable");
     }
 
     modifier whenAccountFrozen(address account) {
@@ -59,5 +60,11 @@ abstract contract MayBeFreezable is Ownable {
 
     function removeFrozenAccount(address account) public onlyOwner whenFreezable {
         _accountFrozen[account] = false;
+    }
+
+    function setFreezable(bool isFreezable) public onlyOwner whenUpgradeable {
+        require(_isFreezable == isFreezable && _isFreezable, "Freezable: The contract is already freezable");
+        require(_isFreezable == isFreezable && !_isFreezable, "Freezable: The contract is already not freezable");
+        _isFreezable = isFreezable;
     }
 }

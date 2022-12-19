@@ -47,31 +47,53 @@
             "internalType": "bool",
             "name": "isBurnable_",
             "type": "bool"
+          },
+          {
+            "internalType": "bool",
+            "name": "isUpgradeable",
+            "type": "bool"
           }
         ],
         "internalType": "struct Config",
-        "name": "config",
+        "name": "config_",
         "type": "tuple"
       },
       {
-        "internalType": "address",
-        "name": "katonAddress_",
-        "type": "address"
-      },
-      {
-        "internalType": "uint96",
-        "name": "katonFeesPercentage_",
-        "type": "uint96"
-      },
-      {
-        "internalType": "address",
-        "name": "projectAddress_",
-        "type": "address"
-      },
-      {
-        "internalType": "uint96",
-        "name": "projectFeesPercentage_",
-        "type": "uint96"
+        "components": [
+          {
+            "internalType": "address",
+            "name": "katonAddress_",
+            "type": "address"
+          },
+          {
+            "internalType": "uint96",
+            "name": "katonFeesPercentage_",
+            "type": "uint96"
+          },
+          {
+            "internalType": "address",
+            "name": "projectAddress_",
+            "type": "address"
+          },
+          {
+            "internalType": "uint96",
+            "name": "projectFeesPercentage_",
+            "type": "uint96"
+          },
+          {
+            "internalType": "address",
+            "name": "accountAddress_",
+            "type": "address"
+          },
+          {
+            "internalType": "uint96",
+            "name": "accountFeesPercentage_",
+            "type": "uint96"
+          }
+        ],
+        "internalType": "struct Collection.ShareHolders",
+        "name": "shareHolders_",
+        "type": "tuple"
       },
       {
         "internalType": "address",
@@ -137,6 +159,25 @@
       }
     ],
     "name": "Paused",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "Received",
     "type": "event"
   },
   {
@@ -361,7 +402,18 @@
     "type": "function"
   },
   {
-    "inputs": [],
+    "inputs": [
+      {
+        "internalType": "bool",
+        "name": "native",
+        "type": "bool"
+      },
+      {
+        "internalType": "address",
+        "name": "tokenAddress",
+        "type": "address"
+      }
+    ],
     "name": "claim",
     "outputs": [],
     "stateMutability": "nonpayable",
@@ -672,6 +724,71 @@
   {
     "inputs": [
       {
+        "internalType": "bool",
+        "name": "isBurnable",
+        "type": "bool"
+      }
+    ],
+    "name": "setBurnable",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bool",
+        "name": "isFreezable",
+        "type": "bool"
+      }
+    ],
+    "name": "setFreezable",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bool",
+        "name": "isMintable",
+        "type": "bool"
+      }
+    ],
+    "name": "setMintable",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bool",
+        "name": "isPausable",
+        "type": "bool"
+      }
+    ],
+    "name": "setPausable",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bool",
+        "name": "isWipeable",
+        "type": "bool"
+      }
+    ],
+    "name": "setWipeable",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "bytes4",
         "name": "interfaceId",
         "type": "bytes4"
@@ -706,6 +823,19 @@
     "name": "unpause",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "upgradeable",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -757,5 +887,9 @@
     ],
     "stateMutability": "view",
     "type": "function"
+  },
+  {
+    "stateMutability": "payable",
+    "type": "receive"
   }
 ]

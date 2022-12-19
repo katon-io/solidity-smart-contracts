@@ -52,6 +52,11 @@
             "internalType": "bool",
             "name": "isBurnable_",
             "type": "bool"
+          },
+          {
+            "internalType": "bool",
+            "name": "isUpgradeable",
+            "type": "bool"
           }
         ],
         "internalType": "struct Config",
@@ -805,6 +810,71 @@
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "bool",
+        "name": "isBurnable",
+        "type": "bool"
+      }
+    ],
+    "name": "setBurnable",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bool",
+        "name": "isFreezable",
+        "type": "bool"
+      }
+    ],
+    "name": "setFreezable",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bool",
+        "name": "isMintable",
+        "type": "bool"
+      }
+    ],
+    "name": "setMintable",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bool",
+        "name": "isPausable",
+        "type": "bool"
+      }
+    ],
+    "name": "setPausable",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bool",
+        "name": "isWipeable",
+        "type": "bool"
+      }
+    ],
+    "name": "setWipeable",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "symbol",
     "outputs": [
@@ -901,6 +971,19 @@
     "name": "unpause",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "upgradeable",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {

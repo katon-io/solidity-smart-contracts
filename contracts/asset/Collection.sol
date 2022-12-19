@@ -4,6 +4,7 @@ pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
+import "@openzeppelin/contracts/token/ERC777/IERC777.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
@@ -14,6 +15,7 @@ import "../common/MayBePausable.sol";
 import "../common/MayBeFreezable.sol";
 import "../common/MayBeMintable.sol";
 import "../common/MayBeBurnable.sol";
+import "../common/MayBeUpgradeable.sol";
 import "../common/Config.sol";
 
 contract Collection is
@@ -27,55 +29,72 @@ contract Collection is
     MayBeMintable,
     MayBeBurnable
 {
+
+    struct ShareHolders {
+        address katonAddress_;
+        uint96 katonFeesPercentage_;
+        address projectAddress_;
+        uint96 projectFeesPercentage_;
+        address accountAddress_;
+        uint96 accountFeesPercentage_;
+    }
+
     string private _name;
     bool private _nftOnly;
     mapping(uint256 => bool) private _existingToken;
-    address payable private _katonAddress;
-    uint96 private _katonFeesPercentage;
-    address payable private _projectAddress;
-    uint96 private _projectFeesPercentage;
+    mapping(address => uint96) private _shares;
+    address[] private _shareHolders;
 
     constructor(
         address owner_,
         string memory name_,
         string memory baseUri_,
         bool nftOnly_,
-        Config memory config,
-        address katonAddress_,
-        uint96 katonFeesPercentage_,
-        address projectAddress_,
-        uint96 projectFeesPercentage_,
+        Config memory config_,
+        ShareHolders memory shareHolders_,
         address trustedForwarder_
     )
     ERC2771Context(trustedForwarder_)
         ERC1155(
             string.concat(
                 baseUri_,
+                "/api/assets/collections/",
+                Strings.toHexString(uint160(address(this)), 20) ,
                 "/",
                 Strings.toHexString(uint160(address(this)), 20),
-                "/{id}.json"
+                "_",
+                "{id}.json"
             )
         )
-        MayBeFreezable(config.isFreezable_)
-        MayBeWipeable(config.isWipeable_)
-        MayBePausable(config.isPausable_)
-        MayBeMintable(config.isMintable_)
-        MayBeBurnable(config.isBurnable_)
+        MayBeUpgradeable(config_.isUpgradeable)
+        MayBeFreezable(config_.isFreezable_)
+        MayBeWipeable(config_.isWipeable_)
+        MayBePausable(config_.isPausable_)
+        MayBeMintable(config_.isMintable_)
+        MayBeBurnable(config_.isBurnable_)
     {
         require(
-            katonAddress_ != address(0),
+            shareHolders_.katonAddress_ != address(0),
             "Collection: address zero is not a valid Katon address"
         );
         require(
-            projectAddress_ != address(0),
+            shareHolders_.projectAddress_ != address(0),
             "Collection: address zero is not a valid project address"
         );
         _name = name_;
         _nftOnly = nftOnly_;
-        _katonAddress = payable(katonAddress_);
-        _katonFeesPercentage = katonFeesPercentage_;
-        _projectAddress = payable(projectAddress_);
-        _projectFeesPercentage = projectFeesPercentage_;
+        _shares[shareHolders_.katonAddress_] = shareHolders_.katonFeesPercentage_;
+        _shares[shareHolders_.projectAddress_] = shareHolders_.projectFeesPercentage_;
+        _shareHolders.push(shareHolders_.katonAddress_);
+        _shareHolders.push(shareHolders_.projectAddress_);
+        if(shareHolders_.accountFeesPercentage_ > 0) {
+            require(
+                shareHolders_.accountAddress_ != address(0),
+                "Collection: address zero is not a valid account address"
+            );
+            _shares[shareHolders_.accountAddress_] = shareHolders_.accountFeesPercentage_;
+            _shareHolders.push(shareHolders_.accountAddress_);
+        }
         if(_msgSender() != owner_) {
             _transferOwnership(owner_);
         } 
@@ -99,6 +118,11 @@ contract Collection is
         } else {
             return super._msgSender();
         }
+    }
+
+    event Received(address, uint);
+    receive() external payable {
+        emit Received(super._msgSender(), msg.value);
     }
 
     function supportsInterface(bytes4 interfaceId)
@@ -135,7 +159,7 @@ contract Collection is
             "Token already minted: You can't mint on an existing token, use addSupply instead"
         );
         super._mint(_msgSender(), id, amount, data);
-        super._setTokenRoyalty(id, _msgSender(), feeNumerator);
+        super._setTokenRoyalty(id, address(this), feeNumerator);
         _existingToken[id] = true;
     }
 
@@ -195,9 +219,7 @@ contract Collection is
 
     function _checkShareholder() private view {
         require(
-            _msgSender() == this.owner() ||
-                _msgSender() == _projectAddress ||
-                _msgSender() == _katonAddress,
+            _shares[_msgSender()] > 0,
             "You must be a shareholder to claim fees"
         );
     }
@@ -210,28 +232,34 @@ contract Collection is
         return (balance * feesPercentage) / _feeDenominator();
     }
 
-    modifier balanceNotEmpty() {
-        _checkBalanceNotEmpty();
+    modifier balanceNotEmpty(bool native, address tokenAddress) {
+        _checkBalanceNotEmpty(native, tokenAddress);
         _;
     }
 
-    function _checkBalanceNotEmpty() private view {
-        require(address(this).balance > 0, "No fees to claim");
+    function _checkBalanceNotEmpty(bool native, address tokenAddress) private view {
+        if(native) {
+            require(address(this).balance > 0, "No fees to claim");
+        } else {
+            require(IERC777(tokenAddress).balanceOf(address(this)) > 0, "No fees to claim");
+        }
     }
 
-    function claim() public isShareholder balanceNotEmpty {
-        uint256 balance = address(this).balance;
-        uint256 katonShare = computeShare(balance, _katonFeesPercentage);
-        uint256 projectShare = computeShare(balance, _projectFeesPercentage);
-        uint256 ownerShare = balance - katonShare - projectShare;
-
-        if (owner() == _projectAddress) {
-            _katonAddress.transfer(katonShare);
-            _projectAddress.transfer(projectShare + ownerShare);
+    function claim(bool native, address tokenAddress) public isShareholder balanceNotEmpty(native, tokenAddress) {
+        if(native) {
+            uint256 balance = address(this).balance;
+            for (uint i=0; i<_shareHolders.length; i++) {
+                address shareHolderAddress = _shareHolders[i];
+                uint256 share = computeShare(balance, _shares[shareHolderAddress]);
+                payable(shareHolderAddress).transfer(share);
+            }
         } else {
-            _katonAddress.transfer(katonShare);
-            _projectAddress.transfer(projectShare);
-            payable(owner()).transfer(balance);
+            uint256 balance = IERC777(tokenAddress).balanceOf(address(this));
+            for (uint i=0; i<_shareHolders.length; i++) {
+                address shareHolderAddress = _shareHolders[i];
+                uint256 share = computeShare(balance, _shares[shareHolderAddress]);
+                IERC777(tokenAddress).send(shareHolderAddress, share, "");
+            }
         }
     }
 }
