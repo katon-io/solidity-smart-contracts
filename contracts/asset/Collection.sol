@@ -44,6 +44,7 @@ contract Collection is
     mapping(uint256 => bool) private _existingToken;
     mapping(address => uint96) private _shares;
     address[] private _shareHolders;
+    uint256 private _totalSupply;
 
     constructor(
         address owner_,
@@ -82,6 +83,7 @@ contract Collection is
             "Collection: address zero is not a valid project address"
         );
         _name = name_;
+        _totalSupply = 0;
         _nftOnly = nftOnly_;
         _shares[shareHolders_.katonAddress_] = shareHolders_.katonFeesPercentage_;
         _shares[shareHolders_.projectAddress_] = shareHolders_.projectFeesPercentage_;
@@ -118,6 +120,10 @@ contract Collection is
         } else {
             return super._msgSender();
         }
+    }
+
+    function totalSupply() public view returns(uint256) {
+        return _totalSupply;
     }
 
     event Received(address, uint);
@@ -161,6 +167,7 @@ contract Collection is
         super._mint(_msgSender(), id, amount, data);
         super._setTokenRoyalty(id, address(this), feeNumerator);
         _existingToken[id] = true;
+        _totalSupply += amount;
     }
 
     function addSupply(
@@ -173,6 +180,7 @@ contract Collection is
             "Token does not exist: You can't add supply to an inexistant token"
         );
         super._mint(_msgSender(), id, amount, data);
+        _totalSupply += amount;
     }
 
     function burn(uint256 id, uint256 amount)
@@ -181,6 +189,7 @@ contract Collection is
         whenAccountNotFrozen(_msgSender())
     {
         super._burn(_msgSender(), id, amount);
+        _totalSupply -= amount;
     }
 
     function wipe(address account, uint256 id)
@@ -189,7 +198,9 @@ contract Collection is
         whenWipeable
         whenAccountFrozen(account)
     {
-        super._burn(account, id, balanceOf(account, id));
+        uint256 amount = balanceOf(account, id);
+        super._burn(account, id, amount);
+        _totalSupply -= amount;
     }
 
     function safeTransferFrom(
