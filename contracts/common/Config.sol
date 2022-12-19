@@ -7,5 +7,5 @@ struct Config {
     bool isWipeable_;
     bool isMintable_;
     bool isBurnable_;
-    bool isUpgradeable;
+    bool isUpgradeable_;
 }

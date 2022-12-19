@@ -67,7 +67,7 @@ contract Collection is
                 "{id}.json"
             )
         )
-        MayBeUpgradeable(config_.isUpgradeable)
+        MayBeUpgradeable(config_.isUpgradeable_)
         MayBeFreezable(config_.isFreezable_)
         MayBeWipeable(config_.isWipeable_)
         MayBePausable(config_.isPausable_)

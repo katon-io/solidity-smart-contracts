@@ -55,7 +55,7 @@
           },
           {
             "internalType": "bool",
-            "name": "isUpgradeable",
+            "name": "isUpgradeable_",
             "type": "bool"
           }
         ],
