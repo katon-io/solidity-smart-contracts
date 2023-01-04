@@ -1,13 +1,21 @@
-# Sample Hardhat Project
+# Solidity Hardhat project for Katon.io smart contracts
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
+This project contains all contracts used in Katon.io ecosystem for EVM blockchains
 
-Try running some of the following tasks:
+To compile
 
 ```shell
-npx hardhat help
-npx hardhat test
-REPORT_GAS=true npx hardhat test
-npx hardhat node
-npx hardhat run scripts/deploy.ts
+npx hardhat compile
+```
+
+To verify a contract
+Copy the `secrets.template.json` file and name it `secrets.json`. Ask for the `bscscanApiKey` and update the field. 
+
+```shell
+npx hardhat verify --network MAINNET/TESTNET --constructor-args ./arguments.js ADDRESS_OF_CONTRACT
+```
+
+Example:
+```shell
+npx hardhat verify --network testnet --constructor-args ./coin_args.js 0xE1866D37d8e070f94ff97B0c3465713a01ADB25C
 ```
