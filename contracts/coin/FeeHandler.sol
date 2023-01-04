@@ -42,7 +42,7 @@ contract FeeHandler is ERC2771Context, Ownable {
 
         uint256 amount = msg.value;
 
-        uint256 holderAmount = amount / (1.0 + holderFee / 100);
+        uint256 holderAmount = amount - amount / (1.0 + holderFee / 100);
 
         uint256 ownerAmount = (amount - holderAmount) * ownerFee / 100;
 
