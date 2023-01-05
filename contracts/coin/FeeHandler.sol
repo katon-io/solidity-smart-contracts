@@ -3,32 +3,10 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/metatx/ERC2771Context.sol";
 
-contract FeeHandler is ERC2771Context, Ownable {
+contract FeeHandler is Ownable {
 
-    constructor(address trustedForwarder_) 
-        ERC2771Context(trustedForwarder_) {}
-
-    function _msgData() internal view virtual override(ERC2771Context, Context) returns (bytes calldata) {
-        if (isTrustedForwarder(msg.sender)) {
-            return super._msgData()[:msg.data.length - 20];
-        } else {
-            return super._msgData();
-        }
-    }
-
-    function _msgSender() internal view virtual override(ERC2771Context, Context) returns (address sender) {
-        if (isTrustedForwarder(msg.sender)) {
-            // The assembly code is more direct than the Solidity version using `abi.decode`.
-            /// @solidity memory-safe-assembly
-            assembly {
-                sender := shr(96, calldataload(sub(calldatasize(), 20)))
-            }
-        } else {
-            return super._msgSender();
-        }
-    }
+    constructor()  {}
 
     function sendWithFee(
         address payable recipient,
@@ -42,13 +20,9 @@ contract FeeHandler is ERC2771Context, Ownable {
 
         uint256 amount = msg.value;
 
-        uint32 max = 100;
+        uint256 ownerAmount = amount - (amount * 100) / (100 + ownerFee);
 
-        uint32 verifiedHolderFee = (max - ownerFee) * holderFee;
-
-        uint256 ownerAmount = amount * ownerFee / 100;
-
-        uint256 holderAmount = ownerAmount * verifiedHolderFee / 10000;
+        uint256 holderAmount = (amount - ownerAmount) * holderFee / 100;
 
         uint256 recipientAmount = amount - ownerAmount - holderAmount;
 

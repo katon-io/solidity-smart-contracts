@@ -158,13 +158,9 @@ contract Coin is
         require(holderFee <= 100, "Holder Fee must be between 0 and 100");
         require(ownerFee <= 100, "Owner Fee must be between 0 and 100");
 
-        uint32 max = 100;
+        uint256 ownerAmount = amount - (amount * 100) / (100 + ownerFee);
 
-        uint32 verifiedHolderFee = (max - ownerFee) * holderFee;
-
-        uint256 ownerAmount = amount * ownerFee / 100;
-
-        uint256 holderAmount = ownerAmount * verifiedHolderFee / 10000;
+        uint256 holderAmount = (amount - ownerAmount) * holderFee / 100;
 
         uint256 recipientAmount = amount - ownerAmount - holderAmount;
 
