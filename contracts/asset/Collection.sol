@@ -62,8 +62,6 @@ contract Collection is
                 "/api/assets/collections/",
                 Strings.toHexString(uint160(address(this)), 20) ,
                 "/",
-                Strings.toHexString(uint160(address(this)), 20),
-                "_",
                 "{id}.json"
             )
         )
