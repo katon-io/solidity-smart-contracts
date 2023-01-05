@@ -158,9 +158,9 @@ contract Coin is
         require(holderFee <= 100, "Holder Fee must be between 0 and 100");
         require(ownerFee <= 100, "Owner Fee must be between 0 and 100");
 
-        uint256 holderAmount = amount - amount / (1.0 + holderFee / 100);
+        uint256 ownerAmount = amount - (amount * 100) / (100 + ownerFee);
 
-        uint256 ownerAmount = (amount - holderAmount) * ownerFee / 100;
+        uint256 holderAmount = (amount - ownerAmount) * holderFee / 100;
 
         uint256 recipientAmount = amount - ownerAmount - holderAmount;
 
