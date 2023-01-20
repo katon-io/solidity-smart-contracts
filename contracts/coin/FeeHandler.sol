@@ -15,14 +15,14 @@ contract FeeHandler is Ownable {
         uint32 ownerFee
     ) 
         public payable {
-        require(holderFee <= 100, "Holder Fee must be between 0 and 100");
-        require(ownerFee <= 100, "Owner Fee must be between 0 and 100");
+        require(holderFee <= 10000, "Holder Fee must be between 0 and 10000");
+        require(ownerFee <= 10000, "Owner Fee must be between 0 and 10000");
 
         uint256 amount = msg.value;
 
-        uint256 ownerAmount = amount - (amount * 100) / (100 + ownerFee);
+        uint256 ownerAmount = amount - (amount * 10000) / (10000 + ownerFee);
 
-        uint256 holderAmount = (amount - ownerAmount) * holderFee / 100;
+        uint256 holderAmount = (amount - ownerAmount) * holderFee / 10000;
 
         uint256 recipientAmount = amount - ownerAmount - holderAmount;
 
