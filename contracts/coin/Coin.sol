@@ -143,30 +143,4 @@ contract Coin is
     {
         _burn(account, balanceOf(account), "", "");
     }
-
-    function sendWithFee(
-        uint256 amount,
-        address recipient,
-        address feeHolder, 
-        uint32 holderFee,
-        uint32 ownerFee
-    ) public 
-        whenNotPaused
-        whenAccountNotFrozen(_msgSender())
-        whenAccountNotFrozen(recipient) {
-            
-        require(holderFee <= 10000, "Holder Fee must be between 0 and 10000");
-        require(ownerFee <= 10000, "Owner Fee must be between 0 and 10000");
-
-        uint256 ownerAmount = amount - (amount * 10000) / (10000 + ownerFee);
-
-        uint256 holderAmount = (amount - ownerAmount) * holderFee / 10000;
-
-        uint256 recipientAmount = amount - ownerAmount - holderAmount;
-
-        super.transfer(owner(), ownerAmount);
-        super.transfer(feeHolder, holderAmount);
-        super.transfer(recipient, recipientAmount);
-        
-    }
 }

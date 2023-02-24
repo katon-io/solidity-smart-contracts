@@ -41,10 +41,10 @@ contract Collection is
 
     string private _name;
     bool private _nftOnly;
-    mapping(uint256 => bool) private _existingToken;
     mapping(address => uint96) private _shares;
     address[] private _shareHolders;
     uint256 private _totalSupply;
+    uint256 private _nonce;
 
     constructor(
         address owner_,
@@ -82,6 +82,7 @@ contract Collection is
         );
         _name = name_;
         _totalSupply = 0;
+        _nonce = 0;
         _nftOnly = nftOnly_;
         _shares[shareHolders_.katonAddress_] = shareHolders_.katonFeesPercentage_;
         _shares[shareHolders_.projectAddress_] = shareHolders_.projectFeesPercentage_;
@@ -147,8 +148,11 @@ contract Collection is
         return _nftOnly;
     }
 
+    function nonce() public view returns (uint256) {
+        return _nonce;
+    }
+
     function mint(
-        uint256 id,
         uint256 amount,
         uint96 feeNumerator,
         bytes memory data
@@ -158,14 +162,11 @@ contract Collection is
             (isNftOnly() && amount == 1) || !isNftOnly(),
             "NFT Only: The amount should be set to 1"
         );
-        require(
-            _existingToken[id] == false,
-            "Token already minted: You can't mint on an existing token, use addSupply instead"
-        );
-        super._mint(_msgSender(), id, amount, data);
-        super._setTokenRoyalty(id, address(this), feeNumerator);
-        _existingToken[id] = true;
+
+        super._mint(_msgSender(), _nonce, amount, data);
+        super._setTokenRoyalty(_nonce, address(this), feeNumerator);
         _totalSupply += amount;
+        _nonce += 1;
     }
 
     function addSupply(
@@ -174,8 +175,8 @@ contract Collection is
         bytes memory data
     ) public onlyOwner whenMintable whenNotPaused {
         require(
-            _existingToken[id],
-            "Token does not exist: You can't add supply to an inexistant token"
+            id < _nonce,
+            "Token does not exist: Invalid nonce."
         );
         super._mint(_msgSender(), id, amount, data);
         _totalSupply += amount;

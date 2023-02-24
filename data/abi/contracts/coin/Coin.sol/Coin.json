@@ -779,39 +779,6 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "recipient",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "feeHolder",
-        "type": "address"
-      },
-      {
-        "internalType": "uint32",
-        "name": "holderFee",
-        "type": "uint32"
-      },
-      {
-        "internalType": "uint32",
-        "name": "ownerFee",
-        "type": "uint32"
-      }
-    ],
-    "name": "sendWithFee",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "bool",
         "name": "isBurnable",
         "type": "bool"
