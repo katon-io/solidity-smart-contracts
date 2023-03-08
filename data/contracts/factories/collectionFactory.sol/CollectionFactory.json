@@ -1,0 +1,127 @@
+[
+  {
+    "inputs": [],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "_contractAddress",
+        "type": "address"
+      }
+    ],
+    "name": "CollectionIssued",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "owner_",
+        "type": "address"
+      },
+      {
+        "internalType": "string",
+        "name": "name_",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "baseUri_",
+        "type": "string"
+      },
+      {
+        "internalType": "bool",
+        "name": "nftOnly_",
+        "type": "bool"
+      },
+      {
+        "components": [
+          {
+            "internalType": "bool",
+            "name": "isPausable_",
+            "type": "bool"
+          },
+          {
+            "internalType": "bool",
+            "name": "isFreezable_",
+            "type": "bool"
+          },
+          {
+            "internalType": "bool",
+            "name": "isWipeable_",
+            "type": "bool"
+          },
+          {
+            "internalType": "bool",
+            "name": "isMintable_",
+            "type": "bool"
+          },
+          {
+            "internalType": "bool",
+            "name": "isBurnable_",
+            "type": "bool"
+          },
+          {
+            "internalType": "bool",
+            "name": "isUpgradeable_",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct Config",
+        "name": "config_",
+        "type": "tuple"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "katonAddress_",
+            "type": "address"
+          },
+          {
+            "internalType": "uint96",
+            "name": "katonFeesPercentage_",
+            "type": "uint96"
+          },
+          {
+            "internalType": "address",
+            "name": "projectAddress_",
+            "type": "address"
+          },
+          {
+            "internalType": "uint96",
+            "name": "projectFeesPercentage_",
+            "type": "uint96"
+          },
+          {
+            "internalType": "address",
+            "name": "accountAddress_",
+            "type": "address"
+          },
+          {
+            "internalType": "uint96",
+            "name": "accountFeesPercentage_",
+            "type": "uint96"
+          }
+        ],
+        "internalType": "struct ShareHolders",
+        "name": "shareHolders_",
+        "type": "tuple"
+      },
+      {
+        "internalType": "address",
+        "name": "trustedForwarder_",
+        "type": "address"
+      }
+    ],
+    "name": "issueCollection",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]

@@ -6,21 +6,24 @@ import "@solidstate/hardhat-bytecode-exporter";
 import "@nomiclabs/hardhat-etherscan";
 
 const config: HardhatUserConfig = {
-  solidity: "0.8.17",
+  solidity: {
+    version: "0.8.17",
+    settings: { optimizer: { enabled: true, runs: 25 } },
+  },
   paths: {
     sources: "./contracts",
   },
   abiExporter: {
-    path: "./data/abi",
+    path: "./data",
     runOnCompile: true,
     clear: true,
-    only: ["Coin", "Collection", "FeeHandler", "Relayer"],
+    only: ["Coin", "Collection", "FeeHandler", "Relayer", "CoinFactory", "CollectionFactory"],
   },
   bytecodeExporter: {
-    path: "./data/bin",
+    path: "./data",
     runOnCompile: true,
     clear: true,
-    only: ["Coin", "Collection", "FeeHandler", "Relayer"],
+    only: ["Coin", "Collection", "FeeHandler", "Relayer", "CoinFactory", "CollectionFactory"],
   },
   networks: {
     testnet: {

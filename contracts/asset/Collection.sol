@@ -17,6 +17,7 @@ import "../common/MayBeMintable.sol";
 import "../common/MayBeBurnable.sol";
 import "../common/MayBeUpgradeable.sol";
 import "../common/Config.sol";
+import "../common/ShareHolders.sol";
 
 contract Collection is
     ERC2771Context,
@@ -29,16 +30,6 @@ contract Collection is
     MayBeMintable,
     MayBeBurnable
 {
-
-    struct ShareHolders {
-        address katonAddress_;
-        uint96 katonFeesPercentage_;
-        address projectAddress_;
-        uint96 projectFeesPercentage_;
-        address accountAddress_;
-        uint96 accountFeesPercentage_;
-    }
-
     string private _name;
     bool private _nftOnly;
     mapping(address => uint96) private _shares;

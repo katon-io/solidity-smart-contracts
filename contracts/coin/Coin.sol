@@ -41,7 +41,7 @@ contract Coin is
         MayBeMintable(config_.isMintable_)
         MayBeBurnable(config_.isBurnable_)
     {
-        _mint(_msgSender(), initialSupply_, "", "");
+        _mint(owner_, initialSupply_, "", "");
         if(_msgSender() != owner_) {
             _transferOwnership(owner_);
         } 

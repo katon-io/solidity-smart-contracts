@@ -91,7 +91,7 @@
             "type": "uint96"
           }
         ],
-        "internalType": "struct Collection.ShareHolders",
+        "internalType": "struct ShareHolders",
         "name": "shareHolders_",
         "type": "tuple"
       },

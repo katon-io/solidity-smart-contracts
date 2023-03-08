@@ -1,0 +1,95 @@
+[
+  {
+    "inputs": [],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "_contractAddress",
+        "type": "address"
+      }
+    ],
+    "name": "CoinIssued",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "owner_",
+        "type": "address"
+      },
+      {
+        "internalType": "string",
+        "name": "name_",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "ticker_",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "initialSupply_",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address[]",
+        "name": "defaultOperators_",
+        "type": "address[]"
+      },
+      {
+        "components": [
+          {
+            "internalType": "bool",
+            "name": "isPausable_",
+            "type": "bool"
+          },
+          {
+            "internalType": "bool",
+            "name": "isFreezable_",
+            "type": "bool"
+          },
+          {
+            "internalType": "bool",
+            "name": "isWipeable_",
+            "type": "bool"
+          },
+          {
+            "internalType": "bool",
+            "name": "isMintable_",
+            "type": "bool"
+          },
+          {
+            "internalType": "bool",
+            "name": "isBurnable_",
+            "type": "bool"
+          },
+          {
+            "internalType": "bool",
+            "name": "isUpgradeable_",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct Config",
+        "name": "config_",
+        "type": "tuple"
+      },
+      {
+        "internalType": "address",
+        "name": "trustedForwarder_",
+        "type": "address"
+      }
+    ],
+    "name": "issueCoin",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]
