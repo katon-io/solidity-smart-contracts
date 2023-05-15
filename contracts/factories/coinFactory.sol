@@ -3,12 +3,16 @@
 pragma solidity ^0.8.0;
 
 import "../coin/Coin.sol";
-import "../asset/Collection.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract CoinFactory {
+contract CoinFactory is Ownable {
     event CoinIssued(address _contractAddress);
 
-    constructor() {}
+    address payable _katonAddress;
+
+    constructor(address payable katonAddress_) {
+        _katonAddress = katonAddress_;
+    }
 
     function issueCoin(
         address owner_,
@@ -18,7 +22,11 @@ contract CoinFactory {
         address[] memory defaultOperators_,
         Config memory config_,
         address trustedForwarder_
-    ) public {
+    ) public payable {
+        if (msg.value > 0) {
+            _katonAddress.transfer(msg.value);
+        }
+
         Coin coin = new Coin(
             owner_,
             name_,
@@ -30,5 +38,4 @@ contract CoinFactory {
         );
         emit CoinIssued(address(coin));
     }
-
 }

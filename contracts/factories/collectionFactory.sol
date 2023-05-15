@@ -9,7 +9,12 @@ import "../common/ShareHolders.sol";
 contract CollectionFactory {
     event CollectionIssued(address _contractAddress);
 
-    constructor() {}
+    address payable _katonAddress;
+    
+    constructor(address payable katonAddress_) {
+        _katonAddress = katonAddress_;
+    }
+
 
     function issueCollection(
         address owner_,
@@ -19,7 +24,12 @@ contract CollectionFactory {
         Config memory config_,
         ShareHolders memory shareHolders_,
         address trustedForwarder_
-    ) public {
+    ) public payable {
+
+        if(msg.value > 0) {
+            _katonAddress.transfer(msg.value);
+        }
+        
         Collection coin = new Collection(
             owner_,
             name_,

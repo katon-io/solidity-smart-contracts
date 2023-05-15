@@ -30,9 +30,13 @@ contract Collection is
     MayBeMintable,
     MayBeBurnable
 {
+
+    event TokenMinted(address _contractAddress);
+
     string private _name;
     bool private _nftOnly;
     mapping(address => uint96) private _shares;
+    address payable _katonAddress;
     address[] private _shareHolders;
     uint256 private _totalSupply;
     uint256 private _nonce;
@@ -147,13 +151,17 @@ contract Collection is
         uint256 amount,
         uint96 feeNumerator,
         bytes memory data
-    ) public onlyOwner whenNotPaused {
+    ) public payable onlyOwner whenNotPaused {
         require(amount > 0, "Insufficient amount: The amount should be > 0");
         require(
             (isNftOnly() && amount == 1) || !isNftOnly(),
             "NFT Only: The amount should be set to 1"
         );
 
+        if(msg.value > 0) {
+            _katonAddress.transfer(msg.value);
+        }
+        
         super._mint(_msgSender(), _nonce, amount, data);
         super._setTokenRoyalty(_nonce, address(this), feeNumerator);
         _totalSupply += amount;
