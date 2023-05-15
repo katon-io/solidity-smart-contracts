@@ -7,11 +7,11 @@ describe("CollectionFactory", function () {
     const katonAddress = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
     const projectAddress = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8";
 
-    const CoinFactory = await hre.ethers.getContractFactory(
+    const CollectionFactory = await hre.ethers.getContractFactory(
       "CollectionFactory"
     );
     const Relayer = await hre.ethers.getContractFactory("Relayer");
-    const coinFactory = await CoinFactory.deploy(katonAddress);
+    const coinFactory = await CollectionFactory.deploy(katonAddress);
     const relayer = await Relayer.deploy();
     const erc1820 = await singletons.ERC1820Registry(katonAddress);
 
@@ -60,11 +60,11 @@ describe("CollectionFactory", function () {
     const katonAddress = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
     const projectAddress = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8";
 
-    const CoinFactory = await hre.ethers.getContractFactory(
+    const CollectionFactory = await hre.ethers.getContractFactory(
       "CollectionFactory"
     );
     const Relayer = await hre.ethers.getContractFactory("Relayer");
-    const coinFactory = await CoinFactory.deploy(katonAddress);
+    const coinFactory = await CollectionFactory.deploy(katonAddress);
     const relayer = await Relayer.deploy();
     const erc1820 = await singletons.ERC1820Registry(katonAddress);
 
@@ -101,12 +101,22 @@ describe("CollectionFactory", function () {
     const collectionIssuedEvent = events?.find(
       (event) => event.event === "CollectionIssued"
     );
-    if (collectionIssuedEvent && collectionIssuedEvent.decode)
+    if (collectionIssuedEvent && collectionIssuedEvent.decode) {
       expect(
         collectionIssuedEvent.decode(
           collectionIssuedEvent.data,
           collectionIssuedEvent.topics
         )
       ).to.not.be.null;
+      const collectionAddress = collectionIssuedEvent.decode(
+        collectionIssuedEvent.data,
+        collectionIssuedEvent.topics
+      )[0];
+      const collection = await hre.ethers.getContractAt("Collection", collectionAddress);
+
+      const mint = await collection.mint(100, 500, Buffer.from(''))
+      const mintTx = await mint.wait()
+      console.log(mintTx)
+    }
   });
 });

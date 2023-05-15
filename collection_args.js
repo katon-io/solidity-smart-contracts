@@ -1,6 +1,6 @@
 module.exports = [
-    "0xbac0000ca7c229f42eba090afff7e2498b1c510d",
-    "CollectSale",
+    "0x5203d01978B37F3fF0220A46fF97dA1D85686670",
+    "NewCollec",
     "https://sandbox-static.katon.io",
     false,
     {"isPausable_":true,"isFreezable_":true,"isWipeable_":true,"isMintable_":true,"isBurnable_":true},
