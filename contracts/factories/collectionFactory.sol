@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "../coin/Coin.sol";
 import "../asset/Collection.sol";
 import "../common/ShareHolders.sol";
 

@@ -30,7 +30,6 @@ contract Collection is
     MayBeMintable,
     MayBeBurnable
 {
-
     event TokenMinted(address _contractAddress);
 
     string private _name;
@@ -50,12 +49,12 @@ contract Collection is
         ShareHolders memory shareHolders_,
         address trustedForwarder_
     )
-    ERC2771Context(trustedForwarder_)
+        ERC2771Context(trustedForwarder_)
         ERC1155(
             string.concat(
                 baseUri_,
                 "/api/assets/collections/",
-                Strings.toHexString(uint160(address(this)), 20) ,
+                Strings.toHexString(uint160(address(this)), 20),
                 "/",
                 "{id}.json"
             )
@@ -75,28 +74,42 @@ contract Collection is
             shareHolders_.projectAddress_ != address(0),
             "Collection: address zero is not a valid project address"
         );
+        require(
+            shareHolders_.katonFeesPercentage_ + shareHolders_
+            .projectFeesPercentage_ + shareHolders_.accountFeesPercentage_ == 10000,
+            "Collection: Total fees percentage should be equal to 10000"
+        );
         _name = name_;
         _totalSupply = 0;
         _nonce = 0;
         _nftOnly = nftOnly_;
-        _shares[shareHolders_.katonAddress_] = shareHolders_.katonFeesPercentage_;
-        _shares[shareHolders_.projectAddress_] = shareHolders_.projectFeesPercentage_;
+        _shares[shareHolders_.katonAddress_] = shareHolders_
+            .katonFeesPercentage_;
+        _shares[shareHolders_.projectAddress_] = shareHolders_
+            .projectFeesPercentage_;
         _shareHolders.push(shareHolders_.katonAddress_);
         _shareHolders.push(shareHolders_.projectAddress_);
-        if(shareHolders_.accountFeesPercentage_ > 0) {
+        if (shareHolders_.accountFeesPercentage_ > 0) {
             require(
                 shareHolders_.accountAddress_ != address(0),
                 "Collection: address zero is not a valid account address"
             );
-            _shares[shareHolders_.accountAddress_] = shareHolders_.accountFeesPercentage_;
+            _shares[shareHolders_.accountAddress_] = shareHolders_
+                .accountFeesPercentage_;
             _shareHolders.push(shareHolders_.accountAddress_);
         }
-        if(_msgSender() != owner_) {
+        if (_msgSender() != owner_) {
             _transferOwnership(owner_);
-        } 
+        }
     }
-    
-    function _msgData() internal view virtual override(ERC2771Context, Context) returns (bytes calldata) {
+
+    function _msgData()
+        internal
+        view
+        virtual
+        override(ERC2771Context, Context)
+        returns (bytes calldata)
+    {
         if (isTrustedForwarder(super._msgSender())) {
             return super._msgData()[:msg.data.length - 20];
         } else {
@@ -104,7 +117,13 @@ contract Collection is
         }
     }
 
-    function _msgSender() internal view virtual override(ERC2771Context, Context) returns (address sender) {
+    function _msgSender()
+        internal
+        view
+        virtual
+        override(ERC2771Context, Context)
+        returns (address sender)
+    {
         if (isTrustedForwarder(super._msgSender())) {
             // The assembly code is more direct than the Solidity version using `abi.decode`.
             /// @solidity memory-safe-assembly
@@ -116,22 +135,19 @@ contract Collection is
         }
     }
 
-    function totalSupply() public view returns(uint256) {
+    function totalSupply() public view returns (uint256) {
         return _totalSupply;
     }
 
     event Received(address, uint);
+
     receive() external payable {
         emit Received(super._msgSender(), msg.value);
     }
 
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        virtual
-        override(ERC1155, ERC2981)
-        returns (bool)
-    {
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view virtual override(ERC1155, ERC2981) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 
@@ -158,10 +174,10 @@ contract Collection is
             "NFT Only: The amount should be set to 1"
         );
 
-        if(msg.value > 0) {
+        if (msg.value > 0) {
             _katonAddress.transfer(msg.value);
         }
-        
+
         super._mint(_msgSender(), _nonce, amount, data);
         super._setTokenRoyalty(_nonce, address(this), feeNumerator);
         _totalSupply += amount;
@@ -173,29 +189,23 @@ contract Collection is
         uint256 amount,
         bytes memory data
     ) public onlyOwner whenMintable whenNotPaused {
-        require(
-            id < _nonce,
-            "Token does not exist: Invalid nonce."
-        );
+        require(id < _nonce, "Token does not exist: Invalid nonce.");
         super._mint(_msgSender(), id, amount, data);
         _totalSupply += amount;
     }
 
-    function burn(uint256 id, uint256 amount)
-        public
-        whenNotPaused
-        whenAccountNotFrozen(_msgSender())
-    {
+    function burn(
+        uint256 id,
+        uint256 amount
+    ) public whenNotPaused whenAccountNotFrozen(_msgSender()) {
         super._burn(_msgSender(), id, amount);
         _totalSupply -= amount;
     }
 
-    function wipe(address account, uint256 id)
-        public
-        onlyOwner
-        whenWipeable
-        whenAccountFrozen(account)
-    {
+    function wipe(
+        address account,
+        uint256 id
+    ) public onlyOwner whenWipeable whenAccountFrozen(account) {
         uint256 amount = balanceOf(account, id);
         super._burn(account, id, amount);
         _totalSupply -= amount;
@@ -233,11 +243,10 @@ contract Collection is
         );
     }
 
-    function computeShare(uint256 balance, uint96 feesPercentage)
-        private
-        pure
-        returns (uint256)
-    {
+    function computeShare(
+        uint256 balance,
+        uint96 feesPercentage
+    ) private pure returns (uint256) {
         return (balance * feesPercentage) / _feeDenominator();
     }
 
@@ -246,29 +255,82 @@ contract Collection is
         _;
     }
 
-    function _checkBalanceNotEmpty(bool native, address tokenAddress) private view {
-        if(native) {
+    function _checkBalanceNotEmpty(
+        bool native,
+        address tokenAddress
+    ) private view {
+        if (native) {
             require(address(this).balance > 0, "No fees to claim");
         } else {
-            require(IERC777(tokenAddress).balanceOf(address(this)) > 0, "No fees to claim");
+            require(
+                IERC777(tokenAddress).balanceOf(address(this)) > 0,
+                "No fees to claim"
+            );
         }
     }
 
-    function claim(bool native, address tokenAddress) public isShareholder balanceNotEmpty(native, tokenAddress) {
-        if(native) {
-            uint256 balance = address(this).balance;
-            for (uint i=0; i<_shareHolders.length; i++) {
+    event Claimed(
+        bool native,
+        address _tokenAddress,
+        uint256 _totalAmount,
+        uint256 _companyAmount,
+        address _projectHolderAddress,
+        uint256 _projectHolderAmount,
+        address _accountHolderAddress,
+        uint256 _accountHolderAmount
+    );
+
+    function claim(
+        bool native,
+        address tokenAddress
+    ) public isShareholder balanceNotEmpty(native, tokenAddress) {
+        uint256[] memory amounts = new uint256[](_shareHolders.length);
+        uint256 totalAmount;
+        if (native) {
+            totalAmount = address(this).balance;
+            for (uint i = 0; i < _shareHolders.length; i++) {
                 address shareHolderAddress = _shareHolders[i];
-                uint256 share = computeShare(balance, _shares[shareHolderAddress]);
+                uint256 share = computeShare(
+                    totalAmount,
+                    _shares[shareHolderAddress]
+                );
+                amounts[i] = share;
                 payable(shareHolderAddress).transfer(share);
             }
         } else {
-            uint256 balance = IERC777(tokenAddress).balanceOf(address(this));
-            for (uint i=0; i<_shareHolders.length; i++) {
+            totalAmount = IERC777(tokenAddress).balanceOf(address(this));
+            for (uint i = 0; i < _shareHolders.length; i++) {
                 address shareHolderAddress = _shareHolders[i];
-                uint256 share = computeShare(balance, _shares[shareHolderAddress]);
+                uint256 share = computeShare(
+                    totalAmount,
+                    _shares[shareHolderAddress]
+                );
+                amounts[i] = share;
                 IERC777(tokenAddress).send(shareHolderAddress, share, "");
             }
+        }
+        if (amounts.length <= 2) {
+            emit Claimed(
+                native,
+                tokenAddress,
+                totalAmount,
+                amounts[0],
+                _shareHolders[1],
+                amounts[1],
+                address(0),
+                0
+            );
+        } else {
+            emit Claimed(
+                native,
+                tokenAddress,
+                totalAmount,
+                amounts[0],
+                _shareHolders[1],
+                amounts[1],
+                _shareHolders[2],
+                amounts[2]
+            );
         }
     }
 }
